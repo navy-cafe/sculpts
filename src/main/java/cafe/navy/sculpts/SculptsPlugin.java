@@ -44,7 +44,7 @@ public class SculptsPlugin extends JavaPlugin {
             this.realms = new HashMap<>();
         }
 
-        if (this.managers != null) {
+        if (this.managers == null) {
             this.managers = new HashMap<>();
         }
 
