@@ -3,12 +3,10 @@ package cafe.navy.sculpts;
 import cafe.navy.bedrock.paper.Server;
 import cafe.navy.bedrock.paper.realm.Realm;
 import cafe.navy.bedrock.paper.realm.WorldRealm;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
+import cafe.navy.sculpts.command.SculptCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +26,7 @@ public class SculptsPlugin extends JavaPlugin {
             this.server.enable();
         }
         this.loadRealms();
+        this.server.commands().addCommand(new SculptCommand(this.server, this));
     }
 
     @Override

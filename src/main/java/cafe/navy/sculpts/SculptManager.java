@@ -32,4 +32,8 @@ public class SculptManager {
         this.realm.add(sculpt);
         return sculpt;
     }
+
+    public @NonNull Map<String, Sculpt> sculpts() {
+        return Map.copyOf(this.sculpts);
+    }
 }
