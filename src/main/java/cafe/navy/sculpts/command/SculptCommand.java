@@ -60,7 +60,7 @@ public class SculptCommand implements BaseCommand {
                         }
 
                         final var realmManager = managerOpt.get();
-                        final var sculpts = realmManager.sculpts();
+                        final var sculpts = realmManager.sculptsById();
                         if (sculpts.isEmpty()) {
                             continue;
                         }

@@ -3,3 +3,4 @@ version: 1.0.0
 main: cafe.navy.sculpts.SculptsPlugin
 depend:
   - bedrock
+api-version: 1.19
