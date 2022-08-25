@@ -33,9 +33,9 @@ tasks {
         dependsOn(reobfJar)
     }
 
-    reobfJar {
-        outputJar.set(rootProject.layout.buildDirectory.file("libs/${project.name}.jar"))
-    }
+        reobfJar {
+            outputJar.set(rootProject.layout.buildDirectory.file("libs/${project.name}.jar"))
+        }
 }
 
 //

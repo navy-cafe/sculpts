@@ -1,6 +1,5 @@
 package cafe.navy.sculpts.skin.entity;
 
-import cafe.navy.sculpts.skin.SkinType;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 

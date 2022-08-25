@@ -2,18 +2,20 @@ package cafe.navy.sculpts;
 
 import broccolai.corn.paper.item.PaperItemBuilder;
 import cafe.navy.bedrock.paper.Server;
+import cafe.navy.bedrock.paper.entity.ClientEntity;
+import cafe.navy.bedrock.paper.item.ItemType;
 import cafe.navy.bedrock.paper.item.ItemTypeBuilder;
 import cafe.navy.bedrock.paper.message.Message;
 import cafe.navy.bedrock.paper.realm.Realm;
 import cafe.navy.bedrock.paper.realm.WorldRealm;
 import cafe.navy.sculpts.command.SculptCommand;
-import cafe.navy.sculpts.skin.SkinType;
-import cafe.navy.sculpts.skin.entity.EntitySkinType;
-import cafe.navy.sculpts.skin.stand.StandSkinType;
+import cafe.navy.sculpts.tools.RotateToolType;
+import cafe.navy.sculpts.tools.SizeToolType;
+import cafe.navy.sculpts.tools.ToolType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,7 +29,7 @@ public class SculptsPlugin extends JavaPlugin implements Listener {
     private @MonotonicNonNull Server server;
     private @MonotonicNonNull Map<UUID, Realm> realms;
     private @MonotonicNonNull Map<UUID, SculptManager> managers;
-    private @MonotonicNonNull Map<String, SkinType> skinTypes;
+    private @MonotonicNonNull Map<String, ToolType> tools;
 
     @Override
     public void onEnable() {
@@ -68,57 +70,59 @@ public class SculptsPlugin extends JavaPlugin implements Listener {
                 })
                 .build());
 
-        this.skinTypes = new HashMap<>();
-        this.getServer().getPluginManager().registerEvents(this, this);
-
-        this.registerSkinType(new StandSkinType());
-
-        for (final var type : EntityType.values()) {
-            if (type.getName() == null) {
-                continue;
-            }
-            final var skinType = new EntitySkinType(net.minecraft.world.entity.EntityType.byString(type.getName()).get());
-            this.registerSkinType(skinType);
-        }
+        this.tools = new HashMap<>();
+        this.registerTool(new RotateToolType());
+        this.registerTool(new SizeToolType());
     }
 
-    public void registerSkinType(final @NonNull SkinType<?> type) {
-        this.skinTypes.put(type.id(), type);
-        this.server.items().register(ItemTypeBuilder
-                .of("sculpt_skin_" + type.id(), PaperItemBuilder
-                        .ofType(Material.CHAIN_COMMAND_BLOCK)
-                        .name(Message
-                                .create("Sculpt Skin: ")
-                                .text(type.name())
-                                .asComponent())
-                        .lore(type.description())
-                        .build())
+    public void registerTool(final @NonNull ToolType type) {
+        this.tools.put(type.id(), type);
+    }
+
+    public @NonNull List<ToolType> toolTypes() {
+        return List.copyOf(this.tools.values());
+    }
+
+    public @NonNull Optional<@NonNull ToolType> toolType(final @NonNull String id) {
+        return Optional.ofNullable(this.tools.get(id));
+    }
+
+    public void giveTool(final @NonNull Player player,
+                         final @NonNull ToolType type) {
+        final var itemType = ItemTypeBuilder
+                .of("id", type.newItemBuilder().build())
                 .onEntityInteract(ctx -> {
-                    System.out.println("sculpt_skin_" + type.id());
-                    try {
-                        final var entity = ctx.clientEntity();
-                        if (entity == null) {
-                            return;
-                        }
+                    System.out.println("Handling interact");
 
-                        if (entity.getTop() instanceof Sculpt sculpt) {
-                            type.apply(sculpt);
-                        }
-
-                    } catch (final Exception e) {
-                        e.printStackTrace();
+                    if (ctx.clientEntity() == null) {
+                        return;
                     }
-                })
-                .build());
+
+                    final ClientEntity entity = ctx.clientEntity();
+                    if (!(entity.getTop() instanceof SculptEntity sculpt)) {
+                        return;
+                    }
+
+                    type.handleInteract(player, sculpt.sculpt());
+                });
+
+        final var item = this.server.items().createItem(itemType.build());
+        player.getInventory().addItem(this.server.items().getItemStack(item));
     }
 
-    @Override
+
+
+        @Override
     public void onDisable() {
         HandlerList.unregisterAll((Listener) this);
     }
 
     public @NonNull Optional<@NonNull SculptManager> getManager(final @NonNull UUID realm) {
         return Optional.ofNullable(this.managers.get(realm));
+    }
+
+    public @NonNull List<@NonNull SculptManager> managers() {
+        return List.copyOf(this.managers.values());
     }
 
     private void loadRealms() {
